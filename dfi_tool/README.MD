@@ -5,17 +5,24 @@ This util allows you to get the associated hashes of an ioc. You have the option
 **Usage**
 
 ```
-python3 grab_associated_hashes.py -h
-usage: grab_associated_hashes.py [-h] [-l LIST] [-f] [-v] [-k KEY]
+dfi_tool.py [-h] [-l LIST] [-f] [--hash HASH] [--url URL] [--ip IP]
+                 [--domain DOMAIN] [--embedded EMBEDDED] [-v] [-k KEY]
 
 optional arguments:
   -h, --help            show this help message and exit
   -l LIST, --list LIST  path to file or directory of rules used on list of
                         feeds
   -f, --full            scan full iocdb/repdb list
+  --hash HASH           request hash from labs
+  --url URL             request hashes associated with url (or partial) from
+                        labs
+  --ip IP               request hashes associated with an ip from labs
+  --domain DOMAIN       request hashes associated with domain (or partial)
+                        from labs
+  --embedded EMBEDDED   request hashes associated with embedded logic from
+                        labs
   -v, --verbose         increase verbosity
   -k KEY, --key KEY     scan full iocdb/repdb list
-
 ```
 
 **Examples**
@@ -25,6 +32,12 @@ Full Scan
 
 Custom Scan
 `python3 grab_associated_hashes.py -v -l associated_hash_ioc_list`
+
+Download hash
+`python3 grab_associated_hashes.py --hash <hash>`
+
+Download get hashes for domain
+`python3 grab_associated_hashes.py --domain <domain>`
 
 
 **Tips**
