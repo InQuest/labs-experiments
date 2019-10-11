@@ -34,11 +34,19 @@ def scrape_iocdb_domains(choice="",key=None):
     return results
 
 def aggregate_labs_iocs():
+    '''
+    Request the list of iocs from both labs and repdb, then merge the lists together
+    Returns a list of dictionaries
+    '''
     results = scrape_iocdb_domains()
     results.extend(scrape_repdb_domains())
     return results
 
 def request_dfi_ip(ip,key=None):
+    '''
+    Request the associated hashes tied to an ip address
+    Returns list of hash strings
+    '''
     url = "https://labs.inquest.net/api/dfi/search/ioc/ip?keyword="+ip
     response = requests.request("GET", url, headers=header)
     res= json.loads(response.text)
@@ -48,6 +56,10 @@ def request_dfi_ip(ip,key=None):
     return results
 
 def request_dfi_url(url,key=None):
+    '''
+    Request the associated hashes tied to a url
+    Returns list of hash strings
+    '''
     url = "https://labs.inquest.net/api/dfi/search/ioc/url?keyword="+url
     response = requests.request("GET", url, headers=header)
     res= json.loads(response.text)
@@ -57,6 +69,10 @@ def request_dfi_url(url,key=None):
     return results
 
 def request_dfi_domain(domain,key=None):
+    '''
+    Request the associated hashes tied to a domain
+    Returns list of hash strings
+    '''
     url = "https://labs.inquest.net/api/dfi/search/ioc/domain?keyword="+domain
     response = requests.request("GET", url,headers=header)
     res= json.loads(response.text)
@@ -98,6 +114,10 @@ def download_dfi_artifact_by_hash(sha, path=""):
     return response.status_code
 
 def get_hashes_associated_with_ioc(ioc):
+    '''
+    This function routes each ioc dictionary object to it's appropriate handler, which returns the associated hashes.
+    Returns list of hash strings
+    '''
     hashes=[]
     if(ioc["type"] == "url"):
         hashes.extend(request_dfi_url(ioc["ioc"]))
@@ -107,16 +127,19 @@ def get_hashes_associated_with_ioc(ioc):
         hashes.extend(request_dfi_ip(ioc["ioc"]))
     elif(ioc["type"] == "hash"):
         hashes.append(ioc["ioc"])
-    print("ioc: "+ioc["ioc"]+"\n\t"+str(hashes))
     return hashes
-
-#pprint(request_dfi_url("seattle.gov"))
 
 if __name__ == "__main__":
  
     parser = argparse.ArgumentParser()
     parser.add_argument("-l","--list", help="path to file or directory of rules used on list of feeds")
+    
     parser.add_argument("-f", "--full", help="scan full iocdb/repdb list", action="store_true")
+    parser.add_argument("--hash", help="request hash from labs")
+    parser.add_argument("--url", help="request hashes associated with url (or partial) from labs")
+    parser.add_argument("--ip", help="request hashes associated with an ip from labs")
+    parser.add_argument("--domain", help="request hashes associated with domain (or partial) from labs")
+    parser.add_argument("--embedded", help="request hashes associated with embedded logic from labs")
     parser.add_argument("-v", "--verbose", help="increase verbosity", action="store_true")
     parser.add_argument("-k", "--key", help="scan full iocdb/repdb list")
     args = parser.parse_args()
@@ -138,15 +161,14 @@ if __name__ == "__main__":
                     else:
                         os.mkdir(fname)
                         for h in hashes:
-                            print("Hash: ",h)    
+                            if(args.verbose): print("Hash: ",h)    
                             status = download_dfi_artifact_by_hash(h,path=fname)
                 except Exception as e:
-                    print(e)
+                    if(args.verbose): print(e)
 
-    else:
+    elif (args.list):
         with open(args.list) as f:
             for line in f:
-                
                 line=line.strip("\n")
                 ioc={}
                 ioc["ioc"]=line.split(",")[0]
@@ -156,7 +178,7 @@ if __name__ == "__main__":
 
                 print("Getting hashes associated with ",ioc["ioc"])
                 hashes= get_hashes_associated_with_ioc(ioc)
-                print("Hashes: ",hashes)
+                if(args.verbose): print("Hashes: ",hashes)
                 if(len(hashes)>0):
                     try:
                         if(ioc["type"] == "hash"): # if the ioc is a hash itself, don't make a folder
@@ -164,8 +186,30 @@ if __name__ == "__main__":
                         else:
                             os.mkdir(fname)
                             for h in hashes:
-                                print("Hash: ",h)    
+                                if(args.verbose): print("Hash: ",h)    
                                 status = download_dfi_artifact_by_hash(h,path=fname)          
                     except Exception as e:
                         pass
-                  
+    elif(args.hash):
+        if(args.verbose): print("Downloading hash: "+args.hash)
+        download_dfi_artifact_by_hash(args.hash)
+    elif(args.url):
+        if(args.verbose): print("Getting associated hashes for: "+args.url)
+        res = request_dfi_url(args.url)
+        for h in res:
+            print(res)
+    elif(args.ip):
+        if(args.verbose): print("Getting associated hashes for: "+args.ip)
+        res = request_dfi_ip(args.ip)
+        for h in res:
+            print(res)
+    elif(args.domain):
+        if(args.verbose): print("Getting associated hashes for: "+args.domain)
+        res = request_dfi_domain(args.domain)
+        for h in res:
+            print(res)
+    elif(args.embedded):
+        if(args.verbose): print("Getting associated hashes for: "+args.embedded)
+        res = search_dfi_embedded_logic(args.embedded)
+        for h in res:
+            print(res)
