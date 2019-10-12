@@ -1,11 +1,11 @@
 #  This command line tool is for the use of labs.inquest.net in the terminal.
 #  The package itself can also be used as a library for your python scripts.
 #
-# Get your api key here: 
+# Get your api key here:
 #
 #  For any questions, contact Adam Musciano (needmorecowbell) at amusciano@inquest.net
 
-import InquestLabs
+import inquestlabs
 import os
 import argparse
 
@@ -13,7 +13,7 @@ header=None
 
 if __name__ == "__main__":
 
-    labs= InquestLabs.InquestLabs()
+    labs= inquestlabs.inquestlabs()
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-l","--list", help="path to file or directory of rules used on list of feeds")
@@ -44,7 +44,7 @@ if __name__ == "__main__":
                     else:
                         os.mkdir(fname)
                         for h in hashes:
-                            if(args.verbose): print("Hash: ",h)    
+                            if(args.verbose): print("Hash: ",h)
                             status = labs.download_dfi_artifact_by_hash(h,path=fname)
                 except Exception as e:
                     if(args.verbose): print(e)
@@ -69,8 +69,8 @@ if __name__ == "__main__":
                         else:
                             os.mkdir(fname)
                             for h in hashes:
-                                if(args.verbose): print("Hash: ",h)    
-                                status = labs.download_dfi_artifact_by_hash(h,path=fname)          
+                                if(args.verbose): print("Hash: ",h)
+                                status = labs.download_dfi_artifact_by_hash(h,path=fname)
                     except Exception as e:
                         pass
     elif(args.hash):

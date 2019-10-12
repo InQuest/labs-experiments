@@ -2,11 +2,11 @@ import requests
 import json
 import os
 
-class InquestLabs(object):
+class inquestlabs(object):
     header=None
     def set_API_key(self,key):
         '''
-        Sets the api key. 
+        Sets the api key.
         '''
         self.header= {'Authorization': 'Basic '+key}
 
@@ -114,8 +114,8 @@ class InquestLabs(object):
                     fh.write(response.content)
             else:
                 with open(sha, "wb+") as fh:
-                    fh.write(response.content)        
-        
+                    fh.write(response.content)
+
         return response.status_code
 
     def get_hashes_associated_with_ioc(self,ioc):
@@ -133,4 +133,3 @@ class InquestLabs(object):
         elif(ioc["type"] == "hash"):
             hashes.append(ioc["ioc"])
         return hashes
-
